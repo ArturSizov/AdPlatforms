@@ -10,6 +10,7 @@ namespace AdPlatforms.Tests;
 public class InMemoryLocationPlatformsDataSourceTests
 {
     private readonly InMemoryLocationPlatformsDataSource _dataSource;
+    private readonly CancellationToken _cancellationToken = default;
 
     public InMemoryLocationPlatformsDataSourceTests()
     {
@@ -28,21 +29,21 @@ public class InMemoryLocationPlatformsDataSourceTests
         using var reader = new StreamReader(stream);
 
         // Act
-        var result = await _dataSource.CreateAsync(reader);
+        var result = await _dataSource.CreateAsync(reader, _cancellationToken);
 
         // Assert
         Assert.True(result, "CreateAsync should return true for valid input");
 
-        var ruPlatforms = await _dataSource.ReadAsync("/ru");
+        var ruPlatforms = await _dataSource.ReadAsync("/ru", _cancellationToken);
         Assert.Equal(new[] { "Яндекс.Директ" }, ruPlatforms);
 
-        var mskPlatforms = await _dataSource.ReadAsync("/ru/msk");
+        var mskPlatforms = await _dataSource.ReadAsync("/ru/msk", _cancellationToken);
         Assert.Equal(new[] { "Яндекс.Директ", "Газета уральских москвичей" }, mskPlatforms);
 
-        var svrdPlatforms = await _dataSource.ReadAsync("/ru/svrd");
+        var svrdPlatforms = await _dataSource.ReadAsync("/ru/svrd", _cancellationToken);
         Assert.Equal(new[] {"Яндекс.Директ", "Крутая реклама" }, svrdPlatforms);
 
-        var revdaPlatforms = await _dataSource.ReadAsync("/ru/svrd/revda");
+        var revdaPlatforms = await _dataSource.ReadAsync("/ru/svrd/revda", _cancellationToken);
         Assert.Equal(new[] { "Яндекс.Директ", "Ревдинский рабочий", "Крутая реклама" }, revdaPlatforms);
     }
 
@@ -55,11 +56,11 @@ public class InMemoryLocationPlatformsDataSourceTests
         using var reader = new StreamReader(stream);
 
         // Act
-        var result = await _dataSource.CreateAsync(reader);
+        var result = await _dataSource.CreateAsync(reader, _cancellationToken);
 
         // Assert
         Assert.True(result, "CreateAsync should return true even for empty input");
-        var platforms = await _dataSource.ReadAsync("/ru");
+        var platforms = await _dataSource.ReadAsync("/ru", _cancellationToken);
         Assert.Empty(platforms);
     }
 
@@ -72,7 +73,7 @@ public class InMemoryLocationPlatformsDataSourceTests
         using var reader = new StreamReader(stream);
 
         // Act & Assert
-        await Assert.ThrowsAsync<FormatException>(() => _dataSource.CreateAsync(reader));
+        await Assert.ThrowsAsync<FormatException>(() => _dataSource.CreateAsync(reader, _cancellationToken));
     }
 
     [Fact]
@@ -84,7 +85,7 @@ public class InMemoryLocationPlatformsDataSourceTests
         using var reader = new StreamReader(stream);
 
         // Act & Assert
-        await Assert.ThrowsAsync<FormatException>(() => _dataSource.CreateAsync(reader));
+        await Assert.ThrowsAsync<FormatException>(() => _dataSource.CreateAsync(reader, _cancellationToken));
     }
 
     [Fact]
@@ -100,7 +101,7 @@ public class InMemoryLocationPlatformsDataSourceTests
         using var reader = new StreamReader(stream);
 
         // Act
-        var result = await _dataSource.CreateAsync(reader);
+        var result = await _dataSource.CreateAsync(reader, _cancellationToken);
 
         // Assert
         Assert.True(result, "CreateAsync should return true for valid input with empty lines");
@@ -117,10 +118,10 @@ public class InMemoryLocationPlatformsDataSourceTests
         var input = "Яндекс.Директ:/ru";
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
         using var reader = new StreamReader(stream);
-        await _dataSource.CreateAsync(reader);
+        await _dataSource.CreateAsync(reader, _cancellationToken);
 
         // Act
-        var platforms = await _dataSource.ReadAsync("/non/existing");
+        var platforms = await _dataSource.ReadAsync("/non/existing", _cancellationToken);
 
         // Assert
         Assert.Empty(platforms);
@@ -135,13 +136,13 @@ public class InMemoryLocationPlatformsDataSourceTests
         using var reader = new StreamReader(stream);
 
         // Act
-        var result = await _dataSource.CreateAsync(reader);
+        var result = await _dataSource.CreateAsync(reader, _cancellationToken);
 
         // Assert
         Assert.True(result, "CreateAsync should return true for input with whitespace");
-        var ruPlatforms = await _dataSource.ReadAsync("/ru");
+        var ruPlatforms = await _dataSource.ReadAsync("/ru", _cancellationToken);
         Assert.Equal(new[] { "Platform One" }, ruPlatforms);
-        var mskPlatforms = await _dataSource.ReadAsync("/ru/msk");
+        var mskPlatforms = await _dataSource.ReadAsync("/ru/msk", _cancellationToken);
         Assert.Equal(new[] { "Platform One" }, mskPlatforms);
     }
 
@@ -152,14 +153,14 @@ public class InMemoryLocationPlatformsDataSourceTests
         var input1 = "OldPlatform:/ru";
         using var stream1 = new MemoryStream(Encoding.UTF8.GetBytes(input1));
         using var reader1 = new StreamReader(stream1);
-        await _dataSource.CreateAsync(reader1);
+        await _dataSource.CreateAsync(reader1, _cancellationToken);
 
         var input2 = "NewPlatform:/ru";
         using var stream2 = new MemoryStream(Encoding.UTF8.GetBytes(input2));
         using var reader2 = new StreamReader(stream2);
 
         // Act
-        var result = await _dataSource.CreateAsync(reader2);
+        var result = await _dataSource.CreateAsync(reader2, _cancellationToken);
 
         // Assert
         Assert.True(result, "CreateAsync should return true for second call");
@@ -171,6 +172,6 @@ public class InMemoryLocationPlatformsDataSourceTests
     public async Task CreateAsync_NullReader_ThrowsArgumentNullException()
     {
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _dataSource.CreateAsync(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _dataSource.CreateAsync(null!, _cancellationToken));
     }
 }

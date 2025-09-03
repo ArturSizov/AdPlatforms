@@ -21,7 +21,7 @@ public class LocationPlatformsRepository(ILocationPlatformsDataSource dataSource
     public bool IsDataLoaded => _isDataLoaded;
 
     /// <inheritdoc/>
-    public async Task<bool> LoadDataAsync(Stream stream)
+    public async Task<bool> LoadDataAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
@@ -29,7 +29,7 @@ public class LocationPlatformsRepository(ILocationPlatformsDataSource dataSource
             throw new ArgumentException("Stream must support reading.", nameof(stream));
 
         // Ensure only one load operation at a time
-        await _loadLock.WaitAsync();
+        await _loadLock.WaitAsync(cancellationToken);
 
         try
         {
@@ -38,7 +38,7 @@ public class LocationPlatformsRepository(ILocationPlatformsDataSource dataSource
 
             // Load data into the data source
             using var reader = new StreamReader(stream);
-            _isDataLoaded = await dataSource.CreateAsync(reader);
+            _isDataLoaded = await dataSource.CreateAsync(reader, cancellationToken);
 
             return _isDataLoaded;
         }
@@ -49,12 +49,12 @@ public class LocationPlatformsRepository(ILocationPlatformsDataSource dataSource
     }
 
     /// <inheritdoc/>
-    public async Task<LocationPlatformsEntity?> GetPlatformsAsync(string location)
+    public async Task<LocationPlatformsEntity?> GetPlatformsAsync(string location, CancellationToken cancellationToken = default)
     {
         // Retrieve or add the task to fetch platforms for the location
         var task = _cache.GetOrAdd(location, async loc =>
         {
-            var data = await dataSource.ReadAsync(loc);
+            var data = await dataSource.ReadAsync(loc, cancellationToken);
             return data ?? [];
         });
 

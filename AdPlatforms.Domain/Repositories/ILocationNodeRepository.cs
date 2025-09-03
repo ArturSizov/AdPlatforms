@@ -17,12 +17,12 @@ public interface ILocationPlatformsRepository
     /// </summary>
     /// <param name="location">Loaction</param>
     /// <returns></returns>
-    Task<LocationPlatformsEntity?> GetPlatformsAsync(string location);
+    Task<LocationPlatformsEntity?> GetPlatformsAsync(string location, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously loads location platform data from the provided <see cref="Stream"/>.
     /// </summary>
     /// <param name="stream">Stream to read data</param>
     /// <returns></returns>
-    Task<bool> LoadDataAsync(Stream stream);
+    Task<bool> LoadDataAsync(Stream stream, CancellationToken cancellationToken = default);
 }

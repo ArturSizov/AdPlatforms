@@ -9,7 +9,7 @@ public class InMemoryLocationPlatformsDataSource : ILocationPlatformsDataSource
 {
     private readonly ConcurrentDictionary<string, string[]> _locationPlatforms = [];
 
-    public async Task<bool> CreateAsync(StreamReader reader)
+    public async Task<bool> CreateAsync(StreamReader reader, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(reader);
 
@@ -20,7 +20,7 @@ public class InMemoryLocationPlatformsDataSource : ILocationPlatformsDataSource
         var allLocations = new HashSet<string>();
 
         string? line;
-        while ((line = await reader.ReadLineAsync()) != null)
+        while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
         {
             // Skip empty lines
             if (string.IsNullOrWhiteSpace(line))
@@ -76,7 +76,7 @@ public class InMemoryLocationPlatformsDataSource : ILocationPlatformsDataSource
         return true;
     }
 
-    public Task<string[]> ReadAsync(string location)
+    public Task<string[]> ReadAsync(string location, CancellationToken cancellationToken = default)
     {
         if (_locationPlatforms.TryGetValue(location, out var platforms))
             return Task.FromResult(platforms);

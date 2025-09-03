@@ -11,12 +11,12 @@ public interface ILocationPlatformsDataSource
     /// </summary>
     /// <param name="reader"></param>
     /// <returns></returns>
-    Task<bool> CreateAsync(StreamReader reader);
+    Task<bool> CreateAsync(StreamReader reader, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously reads platform data for the specified location.
     /// </summary>
     /// <param name="location">Location</param>
     /// <returns></returns>
-    Task<string[]> ReadAsync(string location);
+    Task<string[]> ReadAsync(string location, CancellationToken cancellationToken = default);
 }

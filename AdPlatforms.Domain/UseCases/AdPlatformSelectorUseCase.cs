@@ -7,11 +7,12 @@ namespace AdPlatforms.Domain.UseCases;
 
 public class AdPlatformSelectorUseCase(ILogger<AdPlatformSelectorUseCase> logger, ILocationPlatformsRepository repository) : IAdPlatformSelectorUseCase
 {
-    public async Task<(bool IsSuccess, string? Error)> LoadDataAsync(Stream stream)
+    /// <inheritdoc/>
+    public async Task<(bool IsSuccess, string? Error)> LoadDataAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (!await repository.LoadDataAsync(stream))
+            if (!await repository.LoadDataAsync(stream, cancellationToken))
                 return (false, "Failed to load data from the provided stream");
 
             return (true, null);
@@ -28,7 +29,8 @@ public class AdPlatformSelectorUseCase(ILogger<AdPlatformSelectorUseCase> logger
         }
     }
 
-    public async Task<(LocationPlatformsEntity? Data, string? Error)> GetPlatformsAsync(string location)
+    /// <inheritdoc/>
+    public async Task<(LocationPlatformsEntity? Data, string? Error)> GetPlatformsAsync(string location, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -42,7 +44,7 @@ public class AdPlatformSelectorUseCase(ILogger<AdPlatformSelectorUseCase> logger
 
 
             // Ensure data is loaded
-            var locationNode = await repository.GetPlatformsAsync(location);
+            var locationNode = await repository.GetPlatformsAsync(location, cancellationToken);
             if (locationNode == null)
                 return (null, $"Unknown location: {location}");
 

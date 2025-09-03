@@ -8,7 +8,7 @@ namespace AdPlatforms.WebApi.Controllers
     public class AdPlatformsController(ILogger<AdPlatformsController> logger, IAdPlatformSelectorUseCase selector) : ControllerBase
     {
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadPlatformsListAsync(IFormFile file)
+        public async Task<IActionResult> UploadPlatformsListAsync(IFormFile file, CancellationToken cancellationToken = default)
         {
             if (file.Length == 0)
                 return BadRequest("Empty file");
@@ -19,7 +19,7 @@ namespace AdPlatforms.WebApi.Controllers
                 using var stream = file.OpenReadStream();
 
                 // Load data using the use case
-                var (success, error) = await selector.LoadDataAsync(stream);
+                var (success, error) = await selector.LoadDataAsync(stream, cancellationToken);
 
                 // Respond based on the result
                 return success
@@ -34,16 +34,14 @@ namespace AdPlatforms.WebApi.Controllers
         }
 
         [HttpPost("retrieve")]
-        public async Task<IActionResult> GetPlatformsAsync(string location)
+        public async Task<IActionResult> GetPlatformsAsync(string location, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(location))
                 return Ok(Array.Empty<string>());
 
-            var (platforms, error) = await selector.GetPlatformsAsync(location);
+            var (platforms, error) = await selector.GetPlatformsAsync(location, cancellationToken);
             if (error != null)
                 return BadRequest(error);
-
-            //var platforms = await platformSelector.GetPlatformsForLocationAsync(location);
 
             return Ok(platforms);
         }
